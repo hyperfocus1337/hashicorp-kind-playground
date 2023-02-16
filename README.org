@@ -1,0 +1,79 @@
+* HashiCorp playground
+
+This HashiCorp playground demonstrates capabilities of Vault, Consul and Boundary.
+
+** Kind
+
+Let's first create a Kind environment
+#+begin_src bash
+kind create cluster --config=kind/cluster.yaml
+#+end_src
+
+Set the kubectl configuration to point to kind
+#+begin_src bash
+kubectl cluster-info --context kind-kind
+#+end_src
+
+** Consul
+
+Consul has a special CLI available to deploy the Consul helm chart.
+
+First, we need to add the repository
+#+begin_src bash
+brew tap hashicorp/tap
+#+end_src
+
+Afterwards we can install the CLI
+#+begin_src bash
+brew install hashicorp/tap/consul-k8s
+#+end_src
+
+Check the installed version
+#+begin_src bash
+consul-k8s version
+#+end_src
+
+Let's now install the Consul Helm chart
+#+begin_src bash
+consul-k8s install -config-file=consul/override-values.yaml
+#+end_src
+
+Watch Consul being deployed
+#+begin_src bash
+watch kubectl get pods -n consul
+#+end_src
+
+Port forward to see the cluster
+#+begin_src bash
+kubectl port-forward svc/consul-ui --namespace consul 8501:443
+#+end_src
+
+Afterwards you can navigate to the cluster: https://localhost:8501/ui/dc1/services
+
+** Vault
+
+We need to install helm before we can install the Vault helm chart
+#+begin_src bash
+brew install helm
+#+end_src
+
+And let's create the Vault namespace
+#+begin_src bash
+kubectl create namespace vault
+#+end_src
+
+Let's now install the Vault Helm chart
+#+begin_src bash
+helm install -f vault/override-values.yaml -n vault vault
+#+end_src
+
+Watch Vault being deployed
+#+begin_src bash
+watch kubectl get pods -n vault
+#+end_src
+
+#+begin_src bash
+kubectl port-forward svc/vault --namespace vault 8200:444
+#+end_src
+
+** Boundary
