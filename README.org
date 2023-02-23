@@ -1,9 +1,8 @@
-* HashiCorp playground
+#+NAME: HashiCorp playground
 
 This HashiCorp playground demonstrates capabilities of Vault, Consul and Boundary.
 
-** Kind
-
+* Kind
 Let's first create a Kind environment
 #+begin_src bash
 kind create cluster --config=kind/cluster.yaml
@@ -14,16 +13,22 @@ Set the kubectl configuration to point to kind
 kubectl cluster-info --context kind-kind
 #+end_src
 
-** Consul
+Now we have a kind cluster!
 
-Consul has a special CLI available to deploy the Consul helm chart.
+Let's configure our cluster to do something...
 
-First, we need to add the repository
+* Homebrew
+We assume you also use a Mac with homebrew.
+
+First, we need to add the [[https://github.com/hashicorp/homebrew-tap][homebrew-tap]], which contains all the HashiCorp software
 #+begin_src bash
 brew tap hashicorp/tap
 #+end_src
 
-Afterwards we can install the CLI
+* Consul
+There's a special CLI available to deploy the Consul helm chart.
+
+Let's install it!
 #+begin_src bash
 brew install hashicorp/tap/consul-k8s
 #+end_src
@@ -50,8 +55,7 @@ kubectl port-forward svc/consul-ui --namespace consul 8501:443
 
 Afterwards you can navigate to the cluster: https://localhost:8501/ui/dc1/services
 
-** Vault
-
+* Vault
 We need to install helm before we can install the Vault helm chart
 #+begin_src bash
 brew install helm
@@ -62,9 +66,19 @@ And let's create the Vault namespace
 kubectl create namespace vault
 #+end_src
 
-Let's now install the Vault Helm chart
+We need to add the HashiCorp helm chart [[https://github.com/hashicorp/vault-helm][repository]]
 #+begin_src bash
-helm install -f vault/override-values.yaml -n vault vault
+helm repo add hashicorp https://helm.releases.hashicorp.com
+#+end_src
+
+Update the helm repo
+#+begin_src bash
+helm repo update
+#+end_src
+
+Let's now install the   Vault Helm chart
+#+begin_src bash
+helm install vault hashicorp/vault -f vault/override-values.yaml
 #+end_src
 
 Watch Vault being deployed
@@ -76,4 +90,17 @@ watch kubectl get pods -n vault
 kubectl port-forward svc/vault --namespace vault 8200:444
 #+end_src
 
-** Boundary
+* Boundary
+
+
+
+* Tearing down
+Show the kind cluster
+#+begin_src bash
+kind get clusters
+#+end_src
+
+Delete the cluster
+#+begin_src bash
+kind delete cluster
+#+end_src
