@@ -15,7 +15,24 @@ kubectl cluster-info --context kind-kind
 
 Now we have a kind cluster!
 
-Let's configure our cluster to do something...
+Let's also install the metrics-server, so we can observe any potential memory issues
+#+begin_src bash
+helm repo add metrics-server https://kubernetes-sigs.github.io/metrics-server/
+#+end_src
+
+Update the repo so we can install the metrics-server
+#+begin_src bash
+helm repo update
+#+end_src
+
+Install the metrics-server with compatibility options for kind
+#+begin_src bash
+helm upgrade --install --set args={--kubelet-insecure-tls} metrics-server metrics-server/metrics-server --namespace kube-system
+#+end_src
+
+Now we can observe the memory usage of the cluster using =kubectl top nodes=
+
+Time to configure our cluster to do something...
 
 * Homebrew
 We assume you also use a Mac with homebrew.
@@ -76,9 +93,9 @@ Update the helm repo
 helm repo update
 #+end_src
 
-Let's now install the   Vault Helm chart
+Let's now install the Vault Helm chart
 #+begin_src bash
-helm install vault hashicorp/vault -f vault/override-values.yaml
+helm install vault hashicorp/vault -f vault/override-values.yaml -n vault
 #+end_src
 
 Watch Vault being deployed
@@ -86,9 +103,17 @@ Watch Vault being deployed
 watch kubectl get pods -n vault
 #+end_src
 
+After the pods have started, we can initialize the Vault and add the keys to the cluster-keys.json file
 #+begin_src bash
-kubectl port-forward svc/vault --namespace vault 8200:444
+kubectl exec -n vault vault-0 -- vault operator init -key-shares=1 -key-threshold=1 -format=json > cluster-keys.json
 #+end_src
+
+Port forward the Vault port to localhost
+#+begin_src bash
+kubectl port-forward service/vault --namespace vault 8200:8200
+#+end_src
+
+Afterwards you can navigate to the cluster: https://localhost:8200
 
 * Boundary
 
