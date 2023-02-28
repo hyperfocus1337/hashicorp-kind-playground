@@ -43,7 +43,7 @@ ui:
 # Configures and installs the automatic Consul Connect sidecar injector.
 connectInject:
   enabled: true
-    # Enables metrics for Consul Connect sidecars.
+  # Enables metrics for Consul Connect sidecars.
   metrics:
     defaultEnabled: true
     # Enables service metrics and sidecar proxy metrics merging into one endpoint.
